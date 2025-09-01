@@ -1,0 +1,4 @@
+export const MIN_NUMBER_OF_EXCHANGES = 1;
+export const MAX_NUMBER_OF_EXCHANGES = 7;
+export const MAX_MILISECONDS_TO_UPDATE = 10000; // 10 seconds
+export const DOLAR_TO_EURO_CONVERSION_RATE = 0.85;

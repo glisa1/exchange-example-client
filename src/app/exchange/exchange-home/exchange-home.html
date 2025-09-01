@@ -1,0 +1,148 @@
+<h1>The Exchange</h1>
+<div class="exchange-home">
+  <div>
+    <h2>
+      Exchange Status: {{connectedToExchange() ? 'Connected' : 'Disconnected'}}
+    </h2>
+  </div>
+
+  <div>
+    <button class="btn btn-secondary" (click)="nabigateToHome()">
+      Return to home page
+    </button>
+    @if (connectedToExchange()){
+    <button class="btn btn-primary" (click)="disconnectFromExchange()">
+      Disconnect from the Exchange
+    </button>
+    } @else {
+    <button class="btn btn-primary" (click)="connectToExchange()">
+      Connect to the Exchange
+    </button>
+    }
+  </div>
+
+  <div class="exchange-data">
+    @if (trackingAnyIndex()){
+    <table class="table table-bordered mb-0 exchange-table">
+      @for (stockExchangeData of exchangeData; track $index) {
+      <div
+        class="exchange-item"
+        [ngClass]="stockExchangeData.priceGrown ? 'price-rising' : 'price-falling'"
+      >
+        <tr>
+          <td><h3 style="margin: 0">{{stockExchangeData.code}}</h3></td>
+          <td>
+            @if(stockExchangeData.price) {
+            <span>{{stockExchangeData.price | currency: 'USD'}}</span>
+            } @else {
+            <span>Fetching price...</span>
+            }
+          </td>
+          <td>
+            @if(stockExchangeData.priceEuro) {
+            <span>{{stockExchangeData.priceEuro | currency: 'EUR'}}</span>
+            } @else {
+            <span>Fetching price in EUR...</span>
+            }
+          </td>
+          @if (canRemoveIndex()) {
+          <td>
+            <button
+              class="btn btn-danger"
+              (click)="removeExchangeIndex(stockExchangeData.code)"
+            >
+              Remove
+            </button>
+          </td>
+          } @if (canBuyOrSellStock(stockExchangeData.code)) {
+          <td>
+            <input
+              #quantityBuyInput
+              type="number"
+              class="form-control"
+              value="0"
+              placeholder="Quantity"
+            />
+            <button
+              (click)="buyStockAmount(stockExchangeData.code, quantityBuyInput)"
+              class="btn btn-primary"
+            >
+              Buy amount
+            </button>
+          </td>
+          <td>
+            <input
+              #quantitySellInput
+              type="number"
+              class="form-control"
+              value="0"
+              placeholder="Quantity"
+            />
+            <button
+              (click)="sellStockAmount(stockExchangeData.code, quantitySellInput)"
+              class="btn btn-primary"
+            >
+              Sell amount
+            </button>
+          </td>
+          <td>
+            <span>
+              Owned: {{getOwnedStockAmount(stockExchangeData.code) || 0}}
+            </span>
+          </td>
+          <td>
+            <span
+              >Owned value: {{getOwnedStockAmountValue(stockExchangeData.code)
+              || 0 | currency: 'USD'}}</span
+            >
+          </td>
+          <td>
+            <span
+              >Owned value EUR:
+              {{getOwnedStockAmountValueEur(stockExchangeData.code) || 0 |
+              currency: 'EUR'}}</span
+            >
+          </td>
+          }
+        </tr>
+      </div>
+      }
+      <tr>
+        <th class="text-end">
+          <span
+            >Total: {{totalPriceValue | currency: 'USD'}} {{totalPriceEuroValue
+            | currency: 'EUR'}}</span
+          >
+        </th>
+      </tr>
+    </table>
+    }@else {
+    <p>Please start tracking an index to see the data.</p>
+    }
+  </div>
+
+  @if(canTrackNewIndex()) {
+  <div class="add-exchange-data">
+    <h2>Add Exchange Data</h2>
+    <div class="form-group">
+      <label for="code">Code:</label>
+      <input
+        type="text"
+        id="code"
+        [(ngModel)]="newIndexCode"
+        name="code"
+        class="form-control"
+        maxlength="3"
+        required
+      />
+      <button
+        class="btn btn-success"
+        (click)="addExchangeIndex()"
+        [disabled]="!newIndexCode"
+      >
+        Add
+      </button>
+    </div>
+  </div>
+  }
+</div>

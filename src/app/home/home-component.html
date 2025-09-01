@@ -1,0 +1,13 @@
+<p>Welcome to the Exchange</p>
+<div>
+  @if (userSignal()) { } @else {
+  <div>
+    <label>First name</label>
+    <input type="text" [(ngModel)]="userFirstName" />
+    <label>Last name</label>
+    <input type="text" [(ngModel)]="userLastName" />
+    <span class="text text-danger">All values are required.</span>
+  </div>
+  }
+  <button (click)="navigateToExchange()">Go to the exchange</button>
+</div>

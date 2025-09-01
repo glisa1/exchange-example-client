@@ -1,0 +1,22 @@
+.exchange-home{
+    .exchange-data{
+        .exchange-table{
+                td{
+                    width: 100px;
+                }
+
+                .text-end{
+                    text-align: left;
+                }
+            }
+
+        .exchange-item{
+            &.price-rising{
+                color: green;
+            }
+            &.price-falling{
+                color: red;
+            }
+        }
+    }
+}
