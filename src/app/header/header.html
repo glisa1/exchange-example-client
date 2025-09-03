@@ -1,8 +1,6 @@
 @if (user$ | async; as user) {
 <div class="user-info">
-  <p>Welcome</p>
-  <p>{{ user.lastName }}</p>
-  <p>{{ user.firstName }}</p>
+  <p>Welcome {{ user.lastName }}, {{ user.firstName }}</p>
 </div>
 <div class="user-logout">
   <button class="btn btn-primary" (click)="logout()">Logout</button>

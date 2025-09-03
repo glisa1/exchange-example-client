@@ -7,8 +7,8 @@ import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
 import {provideStore} from '@ngrx/store';
-import {reducers} from './state/app.reducer';
 import {provideKeycloak} from 'keycloak-angular';
+import {reducers} from './state/app.reducer';
 
 export const appConfig: ApplicationConfig = {
   providers: [

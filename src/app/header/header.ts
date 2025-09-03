@@ -2,8 +2,8 @@ import {Component, inject} from '@angular/core';
 import {AppState} from '../state/app.state';
 import {Store} from '@ngrx/store';
 import {AsyncPipe} from '@angular/common';
-import {userLogout} from '../state/app.action';
 import {Router} from '@angular/router';
+import Keycloak from 'keycloak-js';
 
 @Component({
   selector: 'app-header',
@@ -13,12 +13,11 @@ import {Router} from '@angular/router';
   standalone: true,
 })
 export class HeaderComponent {
-  private readonly store = inject(Store<AppState>);
   private readonly router = inject(Router);
-  public user$ = this.store.select(state => state.user);
+  private readonly keycloak = inject(Keycloak);
+  public user$ = this.keycloak.loadUserProfile();
 
   public logout(): void {
-    this.store.dispatch(userLogout());
-    this.router.navigate(['']);
+    this.keycloak.logout({redirectUri: window.location.origin});
   }
 }
