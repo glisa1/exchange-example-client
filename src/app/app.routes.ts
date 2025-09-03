@@ -1,5 +1,5 @@
 import {Routes} from '@angular/router';
-import {AuthGuard} from './shared/guard/auth.guard';
+import {canActivateAuthRole} from './shared/guard/auth.guard';
 
 export const routes: Routes = [
   {
@@ -8,7 +8,7 @@ export const routes: Routes = [
       import('./exchange/exchange-home/exchange-home').then(
         m => m.ExchangeHomeComponent
       ),
-    canActivate: [AuthGuard],
+    canActivate: [canActivateAuthRole],
   },
   {
     path: '',

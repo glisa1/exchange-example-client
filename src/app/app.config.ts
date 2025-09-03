@@ -8,6 +8,7 @@ import {provideRouter} from '@angular/router';
 import {routes} from './app.routes';
 import {provideStore} from '@ngrx/store';
 import {reducers} from './state/app.reducer';
+import {provideKeycloak} from 'keycloak-angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,5 +16,16 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     provideStore(reducers),
+    provideKeycloak({
+      config: {
+        url: 'http://localhost:8080',
+        realm: 'exchange-example',
+        clientId: 'exchange-example-client',
+      },
+      initOptions: {
+        onLoad: 'check-sso',
+        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+      },
+    }),
   ],
 };

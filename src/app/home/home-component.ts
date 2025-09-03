@@ -7,6 +7,7 @@ import {userLogin} from '../state/app.action';
 import {AppState} from '../state/app.state';
 import {Store} from '@ngrx/store';
 import {toSignal} from '@angular/core/rxjs-interop';
+import Keycloak from 'keycloak-js';
 
 @Component({
   selector: 'app-home-component',
@@ -18,6 +19,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 export class HomeComponent {
   private readonly router = inject(Router);
   private readonly store = inject(Store<AppState>);
+  private readonly keycloak = inject(Keycloak);
   private user$ = this.store.select(state => state.user);
 
   public userSignal = toSignal(this.user$, {initialValue: null});
@@ -25,15 +27,26 @@ export class HomeComponent {
   public userLastName = '';
 
   public navigateToExchange(): void {
-    if (!this.userSignal()) {
-      if (!this.validateUserInput()) {
-        return;
-      }
+    // if (!this.userSignal()) {
+    //   if (!this.validateUserInput()) {
+    //     return;
+    //   }
 
-      this.dispatchUserLogin();
+    //   this.dispatchUserLogin();
+    // }
+
+    if (!this.keycloak.authenticated) {
+      this.keycloak.login({redirectUri: window.location.origin + '/exchange'});
+      return;
     }
 
     this.router.navigate(['/exchange']);
+  }
+
+  public async registerUser(): Promise<void> {
+    await this.keycloak.register({
+      redirectUri: window.location.origin + '/exchange',
+    });
   }
 
   private validateUserInput(): boolean {
