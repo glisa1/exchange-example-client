@@ -1,4 +1,4 @@
-import {ActionReducerMap, createReducer, on} from '@ngrx/store';
+import {ActionReducerMap} from '@ngrx/store';
 import {AppState} from './app.state';
 import {userOwnedExchangeDataReducer} from '../exchange/state/exchange.reducer';
 

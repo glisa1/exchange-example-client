@@ -9,6 +9,7 @@ import {routes} from './app.routes';
 import {provideStore} from '@ngrx/store';
 import {provideKeycloak} from 'keycloak-angular';
 import {reducers} from './state/app.reducer';
+import {provideHttpClient} from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +17,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     provideStore(reducers),
+    provideHttpClient(),
     provideKeycloak({
       config: {
         url: 'http://localhost:8080',

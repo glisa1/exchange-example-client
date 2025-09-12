@@ -1,12 +1,10 @@
-import {Component, inject} from '@angular/core';
+import {Component, computed, inject, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {ExchangeUser} from '../shared/models/exchange-user.model';
-import {AppState} from '../state/app.state';
-import {Store} from '@ngrx/store';
-import {toSignal} from '@angular/core/rxjs-interop';
 import Keycloak from 'keycloak-js';
+import {HomeComponentService} from './home-component.service';
+import {ExchangeDataUser} from './home-component.model';
 
 @Component({
   selector: 'app-home-component',
@@ -15,27 +13,30 @@ import Keycloak from 'keycloak-js';
   styleUrl: './home-component.scss',
   standalone: true,
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private readonly router = inject(Router);
-  private readonly store = inject(Store<AppState>);
   private readonly keycloak = inject(Keycloak);
-  private user$ = this.store.select(state => state.user);
+  private readonly homeComponentService = inject(HomeComponentService);
 
-  public userSignal = toSignal(this.user$, {initialValue: null});
+  public isAuthenticatedSignal = computed(() => this.keycloak.authenticated);
+
+  ngOnInit(): void {
+    if (this.keycloak.authenticated) {
+      const user: ExchangeDataUser = new ExchangeDataUser(
+        this.keycloak.tokenParsed?.['preferred_username']!,
+        this.keycloak.tokenParsed?.['email'],
+        this.keycloak.subject!
+      );
+      this.homeComponentService.registerUserToExchange(user);
+    }
+  }
 
   public login(): void {
-    if (!this.keycloak.authenticated) {
-      this.keycloak.login({redirectUri: window.location.origin + '/exchange'});
-      return;
-    }
-
-    this.router.navigate(['/exchange']);
+    this.keycloak.login();
   }
 
   public async registerUser(): Promise<void> {
-    await this.keycloak.register({
-      redirectUri: window.location.origin + '/exchange',
-    });
+    await this.keycloak.register();
   }
 
   public goToExchange(): void {

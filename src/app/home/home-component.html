@@ -1,6 +1,6 @@
 <p>Welcome to the Exchange</p>
 <div>
-  @if (userSignal()) {
+  @if (isAuthenticatedSignal()) {
   <button (click)="goToExchange()">Go to the exchange</button>
   } @else {
   <button (click)="registerUser()">Register</button>
