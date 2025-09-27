@@ -1,15 +1,21 @@
 import {createReducer, on} from '@ngrx/store';
 import {initialExchangeState} from './exchange.state';
-import {buyStock, sellStock} from './exchange.action';
+import {
+  buyStock,
+  loadExchangeData,
+  sellStock,
+  updateStockPrice,
+} from './exchange.action';
 
 export const userOwnedExchangeDataReducer = createReducer(
   initialExchangeState,
   on(buyStock, (state, {exchangeDataBought}) => {
     if (!state.userOwnedExchangeData) {
       const newState = {
+        ...state,
         userOwnedExchangeData: [exchangeDataBought],
       };
-      console.log('New user owned exchange state after buy:', newState);
+
       return newState;
     }
 
@@ -33,8 +39,6 @@ export const userOwnedExchangeDataReducer = createReducer(
       );
       newState.userOwnedExchangeData = updatedArray;
     }
-
-    console.log('New user owned exchange state after buy:', newState);
 
     return newState;
   }),
@@ -70,8 +74,31 @@ export const userOwnedExchangeDataReducer = createReducer(
 
     newState.userOwnedExchangeData = updatedArray;
 
-    console.log('New user owned exchange state after sell:', newState);
+    return newState;
+  }),
+  on(loadExchangeData, (state, {exchangeData}) => {
+    const newState = {
+      ...state,
+      exchangeData: exchangeData,
+    };
+    return newState;
+  }),
+  on(updateStockPrice, (state, {updatedExchangeData}) => {
+    if (!state.exchangeData) {
+      return {...state};
+    }
 
+    const newState = {...state};
+    const updatedArray = state.exchangeData!.map(data =>
+      data.code === updatedExchangeData.code
+        ? {
+            ...data,
+            price: updatedExchangeData.price,
+            priceGrown: updatedExchangeData.price! > data.price!,
+          }
+        : data
+    );
+    newState.exchangeData = updatedArray;
     return newState;
   })
 );

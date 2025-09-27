@@ -1,16 +1,16 @@
 <h1>The Exchange</h1>
 <div class="exchange-home">
-  <div>
+  <!-- <div>
     <h2>
       Exchange Status: {{connectedToExchange() ? 'Connected' : 'Disconnected'}}
     </h2>
-  </div>
+  </div> -->
 
   <div>
     <button class="btn btn-secondary" (click)="nabigateToHome()">
       Return to home page
     </button>
-    @if (connectedToExchange()){
+    <!-- @if (connectedToExchange()){
     <button class="btn btn-primary" (click)="disconnectFromExchange()">
       Disconnect from the Exchange
     </button>
@@ -18,7 +18,7 @@
     <button class="btn btn-primary" (click)="connectToExchange()">
       Connect to the Exchange
     </button>
-    }
+    } -->
   </div>
 
   <div class="exchange-data">
@@ -45,7 +45,7 @@
             <span>Fetching price in EUR...</span>
             }
           </td>
-          @if (canRemoveIndex()) {
+          <!-- @if (canRemoveIndex()) {
           <td>
             <button
               class="btn btn-danger"
@@ -54,7 +54,8 @@
               Remove
             </button>
           </td>
-          } @if (canBuyOrSellStock(stockExchangeData.code)) {
+          } -->
+          @if (canBuyOrSellStock(stockExchangeData.code)) {
           <td>
             <input
               #quantityBuyInput
@@ -121,7 +122,7 @@
     }
   </div>
 
-  @if(canTrackNewIndex()) {
+  <!-- @if(canTrackNewIndex()) {
   <div class="add-exchange-data">
     <h2>Add Exchange Data</h2>
     <div class="form-group">
@@ -144,5 +145,5 @@
       </button>
     </div>
   </div>
-  }
+  } -->
 </div>

@@ -1,12 +1,10 @@
 import {Component, computed, inject, OnDestroy, signal} from '@angular/core';
-import {ExchangeDataService} from '../../shared/service/exchange-data.service';
-import {map, Subscription} from 'rxjs';
-import {ExchangeData} from '../../shared/models/exchange-data.model';
+import {ExchangeDataService} from '../service/exchange-data.service';
 import {
   ExchangeDataBase,
   ExchangeDataEuro,
   ExchangeDataOwned,
-} from './exchange-home.model';
+} from '../model/exchange-home.model';
 import {CommonModule, CurrencyPipe, NgClass} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {
@@ -17,7 +15,8 @@ import {
 import {Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {ExchangeState} from '../state/exchange.state';
-import {buyStock, sellStock} from '../state/exchange.action';
+import {buyStock, loadExchangeData, sellStock} from '../state/exchange.action';
+import {ExchangePricesService} from '../service/exchange-prices.service';
 
 @Component({
   selector: 'app-exchange-home',
@@ -27,68 +26,87 @@ import {buyStock, sellStock} from '../state/exchange.action';
   standalone: true,
 })
 export class ExchangeHomeComponent implements OnDestroy {
-  private readonly exchangeSubscriptions: Map<string, Subscription> = new Map<
-    string,
-    Subscription
-  >();
+  constructor() {
+    this.exchangeService.fetchExchangeData().subscribe({
+      next: (data: ExchangeDataBase[]) => {
+        this.dispatchLoadExchangeDataAction(data);
+      },
+    });
+    this.exchangePricesService.startRecievingPriceUpdates();
+
+    this.store
+      .select(state => state.exchange.exchangeData)
+      .subscribe((data: ExchangeDataBase[]) => {
+        this.exchangeData = data?.map(exchangeData =>
+          ExchangeDataEuro.fromObject(exchangeData)
+        );
+      });
+  }
+
+  // private readonly exchangeSubscriptions: Map<string, Subscription> = new Map<
+  //   string,
+  //   Subscription
+  // >();
   private readonly exchangeService: ExchangeDataService =
     inject(ExchangeDataService);
   private readonly router = inject(Router);
   private readonly store = inject(Store<ExchangeState>);
+  private readonly exchangePricesService = inject(ExchangePricesService);
 
   public exchangeData?: Array<ExchangeDataEuro>;
   public newIndexCode: string = '';
 
   public canAddIndex = signal(true);
   public canRemoveIndex = signal(true);
-  public connectedToExchange = signal(false);
-  public trackingAnyIndex = signal(false);
-  public canTrackNewIndex = computed(() => {
-    return this.connectedToExchange() && this.canAddIndex();
+  public trackingAnyIndex = computed(() => {
+    const exchangeData = this.store.selectSignal<ExchangeDataBase[] | null>(
+      state => state.exchange.exchangeData
+    )();
+    return Array.isArray(exchangeData) && exchangeData.length > 0;
   });
 
-  public disconnectFromExchange(): void {
-    this.unsubscribeFromAllExchanges();
-    this.connectedToExchange.set(false);
-  }
+  // public disconnectFromExchange(): void {
+  //   //this.unsubscribeFromAllExchanges();
+  //   this.connectedToExchange.set(false);
+  // }
 
-  public connectToExchange(): void {
-    this.syncExchangeData();
-    this.connectedToExchange.set(true);
-  }
+  // public connectToExchange(): void {
+  //   //this.syncExchangeData();
+  //   this.connectedToExchange.set(true);
+  // }
 
-  public addExchangeIndex(): void {
-    const newIndexCode = this.newIndexCode.trim().toUpperCase();
-    if (newIndexCode === '') {
-      return;
-    }
+  // public addExchangeIndex(): void {
+  //   const newIndexCode = this.newIndexCode.trim().toUpperCase();
+  //   if (newIndexCode === '') {
+  //     return;
+  //   }
 
-    if (this.exchangeData?.some(e => e.code === newIndexCode)) {
-      this.newIndexCode = '';
-      return;
-    }
+  //   if (this.exchangeData?.some(e => e.code === newIndexCode)) {
+  //     this.newIndexCode = '';
+  //     return;
+  //   }
 
-    const newIndexName = `${newIndexCode}_name`;
+  //   const newIndexName = `${newIndexCode}_name`;
 
-    this.exchangeService.addExchangeIndex(newIndexCode, newIndexName);
-    this.exchangeData?.push(new ExchangeDataEuro(newIndexCode, newIndexName));
-    this.exchangeSubscriptions.set(
-      newIndexCode,
-      this.getIndexPriceSubscription(newIndexCode)
-    );
+  //   this.exchangeService.addExchangeIndex(newIndexCode, newIndexName);
+  //   this.exchangeData?.push(new ExchangeDataEuro(newIndexCode, newIndexName));
+  //   this.exchangeSubscriptions.set(
+  //     newIndexCode,
+  //     this.getIndexPriceSubscription(newIndexCode)
+  //   );
 
-    this.newIndexCode = '';
-    this.updateAddAndRemoveIndexSignals();
-  }
+  //   this.newIndexCode = '';
+  //   this.updateAddAndRemoveIndexSignals();
+  // }
 
-  public removeExchangeIndex(code: string): void {
-    this.exchangeService.removeExchangeIndex(code);
-    this.exchangeData = this.exchangeData?.filter(e => e.code !== code);
-    this.exchangeSubscriptions.get(code)?.unsubscribe();
-    this.exchangeSubscriptions.delete(code);
-    this.updateAddAndRemoveIndexSignals();
-    this.updateAnyIndexTrackingSignal();
-  }
+  // public removeExchangeIndex(code: string): void {
+  //   this.exchangeService.removeExchangeIndex(code);
+  //   this.exchangeData = this.exchangeData?.filter(e => e.code !== code);
+  //   this.exchangeSubscriptions.get(code)?.unsubscribe();
+  //   this.exchangeSubscriptions.delete(code);
+  //   this.updateAddAndRemoveIndexSignals();
+  //   this.updateAnyIndexTrackingSignal();
+  // }
 
   public nabigateToHome(): void {
     this.router.navigate(['/']);
@@ -172,22 +190,22 @@ export class ExchangeHomeComponent implements OnDestroy {
     )?.price;
   }
 
-  private syncExchangeData(): void {
-    if (!this.exchangeData || this.exchangeData!.length === 0) {
-      this.exchangeData = this.exchangeService.exchangeData.map(exchangeData =>
-        ExchangeDataBase.fromObject(exchangeData)
-      );
-    }
+  // private syncExchangeData(): void {
+  //   if (!this.exchangeData || this.exchangeData!.length === 0) {
+  //     this.exchangeData = this.exchangeService.exchangeData.map(exchangeData =>
+  //       ExchangeDataBase.fromObject(exchangeData)
+  //     );
+  //   }
 
-    this.updateAnyIndexTrackingSignal();
+  //   this.updateAnyIndexTrackingSignal();
 
-    this.exchangeData!.forEach(exchangeData => {
-      this.exchangeSubscriptions.set(
-        exchangeData.code,
-        this.getIndexPriceSubscription(exchangeData.code)
-      );
-    });
-  }
+  //   this.exchangeData!.forEach(exchangeData => {
+  //     this.exchangeSubscriptions.set(
+  //       exchangeData.code,
+  //       this.getIndexPriceSubscription(exchangeData.code)
+  //     );
+  //   });
+  // }
 
   private updateAddAndRemoveIndexSignals(): void {
     if (this.exchangeData!.length === MAX_NUMBER_OF_EXCHANGES) {
@@ -203,59 +221,59 @@ export class ExchangeHomeComponent implements OnDestroy {
     }
   }
 
-  private updateAnyIndexTrackingSignal(): void {
-    this.exchangeData!.length > 0
-      ? this.trackingAnyIndex.set(true)
-      : this.trackingAnyIndex.set(false);
-  }
+  // private updateAnyIndexTrackingSignal(): void {
+  //   this.exchangeData!.length > 0
+  //     ? this.trackingAnyIndex.set(true)
+  //     : this.trackingAnyIndex.set(false);
+  // }
 
-  private getIndexPriceSubscription(indexCode: string): Subscription {
-    return this.exchangeService
-      .getIndexPrice(indexCode)
-      .pipe(
-        map((value: ExchangeData) => {
-          const existingExchangeData = this.exchangeData!.find(
-            e => e.code === value.code
-          );
+  // private getIndexPriceSubscription(indexCode: string): Subscription {
+  //   return this.exchangeService
+  //     .getIndexPrice(indexCode)
+  //     .pipe(
+  //       map((value: ExchangeData) => {
+  //         const existingExchangeData = this.exchangeData!.find(
+  //           e => e.code === value.code
+  //         );
 
-          let priceGrown = existingExchangeData!.priceGrown ?? false;
-          if (value.price! > existingExchangeData?.price!) {
-            priceGrown = true;
-          } else if (value.price! < existingExchangeData?.price!) {
-            priceGrown = false;
-          }
+  //         let priceGrown = existingExchangeData!.priceGrown ?? false;
+  //         if (value.price! > existingExchangeData?.price!) {
+  //           priceGrown = true;
+  //         } else if (value.price! < existingExchangeData?.price!) {
+  //           priceGrown = false;
+  //         }
 
-          return new ExchangeDataBase(
-            value.code,
-            value.name,
-            value.price!,
-            priceGrown
-          );
-        })
-      )
-      .pipe(
-        map((value: ExchangeData) => {
-          const exchangeData = ExchangeDataEuro.fromObject(value);
-          exchangeData.priceEuro =
-            exchangeData.price! * DOLAR_TO_EURO_CONVERSION_RATE; // Example conversion rate
-          return exchangeData;
-        })
-      )
-      .subscribe(value => {
-        const existingExchangeDataIndex = this.exchangeData!.findIndex(
-          e => e.code === value.code
-        );
+  //         return new ExchangeDataBase(
+  //           value.code,
+  //           value.name,
+  //           value.price!,
+  //           priceGrown
+  //         );
+  //       })
+  //     )
+  //     .pipe(
+  //       map((value: ExchangeData) => {
+  //         const exchangeData = ExchangeDataEuro.fromObject(value);
+  //         exchangeData.priceEuro =
+  //           exchangeData.price! * DOLAR_TO_EURO_CONVERSION_RATE; // Example conversion rate
+  //         return exchangeData;
+  //       })
+  //     )
+  //     .subscribe(value => {
+  //       const existingExchangeDataIndex = this.exchangeData!.findIndex(
+  //         e => e.code === value.code
+  //       );
 
-        this.exchangeData![existingExchangeDataIndex] = value;
-      });
-  }
+  //       this.exchangeData![existingExchangeDataIndex] = value;
+  //     });
+  // }
 
-  private unsubscribeFromAllExchanges(): void {
-    this.exchangeSubscriptions.forEach(subscription => {
-      subscription.unsubscribe();
-    });
-    this.exchangeSubscriptions.clear();
-  }
+  // private unsubscribeFromAllExchanges(): void {
+  //   this.exchangeSubscriptions.forEach(subscription => {
+  //     subscription.unsubscribe();
+  //   });
+  //   this.exchangeSubscriptions.clear();
+  // }
 
   private dispatchStockBuyAction(stockCode: string, amount: number): void {
     const exchangeDataBought = new ExchangeDataOwned(stockCode, amount);
@@ -265,6 +283,10 @@ export class ExchangeHomeComponent implements OnDestroy {
   private dispatchStockSellAction(stockCode: string, amount: number): void {
     const exchangeDataBought = new ExchangeDataOwned(stockCode, amount);
     this.store.dispatch(sellStock({exchangeDataSold: exchangeDataBought}));
+  }
+
+  private dispatchLoadExchangeDataAction(data: ExchangeDataBase[]): void {
+    this.store.dispatch(loadExchangeData({exchangeData: data}));
   }
 
   private clearNumberInputAfterUse(amountInputElement: HTMLInputElement): void {
@@ -284,6 +306,7 @@ export class ExchangeHomeComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribeFromAllExchanges();
+    //this.unsubscribeFromAllExchanges();
+    this.exchangePricesService.stop();
   }
 }

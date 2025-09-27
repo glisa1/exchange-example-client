@@ -1,3 +1,5 @@
+import {DOLAR_TO_EURO_CONVERSION_RATE} from '../../shared/constants/exchange-data.constants';
+
 export class ExchangeDataBase {
   public code: string;
   public name: string;
@@ -31,6 +33,16 @@ export class ExchangeDataEuro extends ExchangeDataBase {
       obj.price,
       obj.priceGrown,
       obj.priceEuro
+    );
+  }
+
+  public static fromExchangeDataBase(data: ExchangeDataBase): ExchangeDataEuro {
+    return new ExchangeDataEuro(
+      data.code,
+      data.name,
+      data.price,
+      data.priceGrown,
+      data.price! * DOLAR_TO_EURO_CONVERSION_RATE
     );
   }
 

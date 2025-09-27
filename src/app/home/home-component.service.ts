@@ -9,11 +9,8 @@ export class HomeComponentService {
   private readonly http = inject(HttpClient);
 
   public registerUserToExchange(user: ExchangeDataUser): void {
-    const url = 'http://localhost:5000/create-user';
+    const url = 'http://localhost:5000/api/create-user';
     this.http.post(url, user).subscribe({
-      next: response => {
-        console.log('User registered successfully:', response);
-      },
       error: error => {
         console.error('Registration failed:', error);
       },
