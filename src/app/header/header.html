@@ -1,8 +1,16 @@
-@if (user$ | async; as user) {
-<div class="user-info">
-  <p>Welcome {{ user.lastName }}, {{ user.firstName }}</p>
+<div class="header">
+  <div class="header-content">
+    <div class="logo">
+      <!-- <img src="assets/logo.png" alt="Logo" /> -->
+      <h1>Exchange Example</h1>
+    </div>
+    @if (user$ | async; as user) {
+    <div class="user-info">
+      <p>Welcome {{ user.lastName }}, {{ user.firstName }}</p>
+    </div>
+    <div class="user-logout">
+      <button class="btn btn-primary" (click)="logout()">Logout</button>
+    </div>
+    }
+  </div>
 </div>
-<div class="user-logout">
-  <button class="btn btn-primary" (click)="logout()">Logout</button>
-</div>
-}

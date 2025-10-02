@@ -1,0 +1,35 @@
+.home-panel{
+    padding: 1.25rem;
+    .card-container{
+        display: flex;
+        align-items: flex-start;
+        height: 100vh;
+        gap: 1.25rem;
+
+        .card-container-item{
+            flex-basis: 20%;
+        }
+
+        .card-container-item:hover{
+            cursor: pointer;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            transform: scale(1.05);
+            transition: all 0.3s ease-in-out;
+        }
+    }
+
+    .not-authenticated{
+        text-align: center;
+        margin-top: 2rem;
+
+        p{
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            color: #555;
+        }
+        
+        button{
+            margin: 0 0.5rem;
+        }
+    }
+}

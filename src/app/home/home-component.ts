@@ -5,10 +5,19 @@ import {FormsModule} from '@angular/forms';
 import Keycloak from 'keycloak-js';
 import {HomeComponentService} from './home-component.service';
 import {ExchangeDataUser} from './home-component.model';
+import {MatCardModule} from '@angular/material/card';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
 
 @Component({
   selector: 'app-home-component',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+  ],
   templateUrl: './home-component.html',
   styleUrl: './home-component.scss',
   standalone: true,
@@ -40,6 +49,22 @@ export class HomeComponent implements OnInit {
   }
 
   public goToExchange(): void {
+    console.log('Navigating to exchange');
     this.router.navigate(['/exchange']);
+  }
+
+  public goToDepositCash(): void {
+    console.log('Navigating to deposit cash page');
+    this.router.navigate(['/deposit-cash']);
+  }
+
+  public goToWithdrawCash(): void {
+    console.log('Navigating to withdraw cash page');
+    this.router.navigate(['/withdraw-cash']);
+  }
+
+  public goToPortfolio(): void {
+    console.log('Navigating to portfolio');
+    this.router.navigate(['/portfolio']);
   }
 }

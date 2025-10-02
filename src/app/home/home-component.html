@@ -1,9 +1,65 @@
-<p>Welcome to the Exchange</p>
-<div>
+<div class="home-panel">
+  <h3>Welcome to the Exchange</h3>
   @if (isAuthenticatedSignal()) {
-  <button (click)="goToExchange()">Go to the exchange</button>
+  <div class="card-container">
+    <mat-card class="card-container-item" (click)="goToExchange()">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>Go to the exchange</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="home"
+        ></mat-icon>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="card-container-item" (click)="goToPortfolio()">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>View portfolio</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="pie_chart"
+        ></mat-icon>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="card-container-item" (click)="goToDepositCash()">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>Deposit cash</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="attach_money"
+        ></mat-icon>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="card-container-item" (click)="goToWithdrawCash()">
+      <mat-card-header>
+        <div mat-card-avatar class="example-header-image"></div>
+        <mat-card-title>Withdraw cash</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-icon
+          aria-hidden="false"
+          aria-label="Example home icon"
+          fontIcon="money"
+        ></mat-icon>
+      </mat-card-content>
+    </mat-card>
+  </div>
   } @else {
-  <button (click)="registerUser()">Register</button>
-  <button (click)="login()">Login</button>
+  <div class="not-authenticated">
+    <p>Please register or login to access the exchange features.</p>
+    <button matButton="filled" (click)="registerUser()">Register</button>
+    <button matButton="filled" (click)="login()">Login</button>
+  </div>
   }
 </div>

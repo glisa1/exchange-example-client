@@ -112,21 +112,6 @@ export class ExchangeHomeComponent implements OnDestroy {
     this.router.navigate(['/']);
   }
 
-  public get totalPriceValue(): number {
-    return (
-      this.exchangeData?.reduce((sum, item) => sum + (item.price ?? 0), 0) ?? 0
-    );
-  }
-
-  public get totalPriceEuroValue(): number {
-    return (
-      this.exchangeData?.reduce(
-        (sum, item) => sum + (item.priceEuro ?? 0),
-        0
-      ) ?? 0
-    );
-  }
-
   public buyStockAmount(
     code: string,
     amountInputElement: HTMLInputElement
@@ -306,7 +291,6 @@ export class ExchangeHomeComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    //this.unsubscribeFromAllExchanges();
     this.exchangePricesService.stop();
   }
 }

@@ -1,5 +1,6 @@
 import {Routes} from '@angular/router';
 import {canActivateAuthRole} from './shared/guard/auth.guard';
+import {PageNotFoundComponent} from './page-not-found/page-not-found-component';
 
 export const routes: Routes = [
   {
@@ -14,5 +15,9 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./home/home-component').then(m => m.HomeComponent),
+  },
+  {
+    path: '**',
+    component: PageNotFoundComponent,
   },
 ];
