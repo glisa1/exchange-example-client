@@ -1,10 +1,11 @@
 import {Component, inject} from '@angular/core';
 import {AsyncPipe} from '@angular/common';
 import Keycloak from 'keycloak-js';
+import {MatButtonModule} from '@angular/material/button';
 
 @Component({
   selector: 'app-header',
-  imports: [AsyncPipe],
+  imports: [AsyncPipe, MatButtonModule],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   standalone: true,

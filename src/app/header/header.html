@@ -9,7 +9,9 @@
       <p>Welcome {{ user.lastName }}, {{ user.firstName }}</p>
     </div>
     <div class="user-logout">
-      <button class="btn btn-primary" (click)="logout()">Logout</button>
+      <button matButton="filled" class="btn btn-primary" (click)="logout()">
+        Logout
+      </button>
     </div>
     }
   </div>

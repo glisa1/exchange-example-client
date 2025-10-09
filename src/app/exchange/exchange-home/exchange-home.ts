@@ -17,10 +17,19 @@ import {Store} from '@ngrx/store';
 import {ExchangeState} from '../state/exchange.state';
 import {buyStock, loadExchangeData, sellStock} from '../state/exchange.action';
 import {ExchangePricesService} from '../service/exchange-prices.service';
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-exchange-home',
-  imports: [NgClass, CommonModule, FormsModule, CurrencyPipe],
+  imports: [
+    NgClass,
+    CommonModule,
+    FormsModule,
+    CurrencyPipe,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './exchange-home.html',
   styleUrl: './exchange-home.scss',
   standalone: true,
@@ -108,7 +117,7 @@ export class ExchangeHomeComponent implements OnDestroy {
   //   this.updateAnyIndexTrackingSignal();
   // }
 
-  public nabigateToHome(): void {
+  public navigateToHome(): void {
     this.router.navigate(['/']);
   }
 

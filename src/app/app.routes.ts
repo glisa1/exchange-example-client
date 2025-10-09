@@ -12,6 +12,26 @@ export const routes: Routes = [
     canActivate: [canActivateAuthRole],
   },
   {
+    path: 'portfolio',
+    loadComponent: () =>
+      import('./portfolio/portfolio').then(m => m.PortfolioComponent),
+    canActivate: [canActivateAuthRole],
+  },
+  {
+    path: 'deposit-cash',
+    loadComponent: () =>
+      import('./deposit-cash/deposit-cash').then(m => m.DepositCashComponent),
+    canActivate: [canActivateAuthRole],
+  },
+  {
+    path: 'withdraw-cash',
+    loadComponent: () =>
+      import('./withdraw-cash/withdraw-cash').then(
+        m => m.WithdrawCashComponent
+      ),
+    canActivate: [canActivateAuthRole],
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./home/home-component').then(m => m.HomeComponent),

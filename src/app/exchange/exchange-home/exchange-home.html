@@ -1,12 +1,22 @@
-<h1>The Exchange</h1>
 <div class="exchange-home">
-  <div>
-    <button class="btn btn-secondary" (click)="nabigateToHome()">
+  <div class="action-bar">
+    <button
+      matButton="filled"
+      class="btn btn-secondary"
+      (click)="navigateToHome()"
+    >
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Example home icon"
+        fontIcon="home"
+      ></mat-icon>
       Return to home page
     </button>
   </div>
 
   <div class="exchange-data">
+    <h1>The Exchange</h1>
+
     @if (trackingAnyIndex()){
     <table class="table table-bordered mb-0 exchange-table">
       @for (stockExchangeData of exchangeData; track $index) {
