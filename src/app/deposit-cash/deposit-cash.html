@@ -14,5 +14,42 @@
     </button>
   </div>
 
-  <p>deposit-cash works!</p>
+  <div class="deposit-cash-container">
+    <h2>Deposit Cash</h2>
+    <div class="deposit-cash-form">
+      <mat-label
+        >Current Amount of Cash:
+        <strong>{{currentAmountOfCash() | currency: 'USD'}}</strong></mat-label
+      >
+      <mat-form-field appearance="fill">
+        <mat-label>Amount</mat-label>
+        <input
+          matInput
+          type="number"
+          name="amount"
+          [formControl]="amountFormControl"
+        />
+        <span matTextPrefix>$&nbsp;</span>
+        <span matTextSuffix>.00</span>
+      </mat-form-field>
+      <mat-label
+        >Amount of cash after deposit
+        <strong>
+          {{amountOfCashAfterDeposit | currency: 'USD'}}</strong
+        ></mat-label
+      >
+      <button
+        matButton="filled"
+        type="submit"
+        [disabled]="!depositCashForm.valid"
+        (click)="onDepositCashFormSubmit()"
+      >
+        Deposit
+      </button>
+
+      @if (message){
+      <div class="message">{{ message }}</div>
+      }
+    </div>
+  </div>
 </div>
