@@ -1,11 +1,4 @@
-import {
-  Component,
-  computed,
-  inject,
-  OnDestroy,
-  OnInit,
-  signal,
-} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -51,8 +44,8 @@ export class DepositCashComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.balanceSubscription = this.userBalanceService
       .getUserBalance(this.keycloak.subject!)
-      .subscribe(balance => {
-        this.currentAmountOfCash.set(balance);
+      .subscribe(userBalance => {
+        this.currentAmountOfCash.set(userBalance.balance);
       });
   }
 
@@ -65,7 +58,6 @@ export class DepositCashComponent implements OnInit, OnDestroy {
   });
 
   public navigateToHome(): void {
-    console.log(this.currentAmountOfCash());
     this.router.navigate(['/']);
   }
 

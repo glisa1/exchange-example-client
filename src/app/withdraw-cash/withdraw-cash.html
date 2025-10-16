@@ -14,5 +14,43 @@
     </button>
   </div>
 
-  <p>withdraw-cash works!</p>
+  <div class="withdraw-cash-container">
+    <h2>Withdraw Cash</h2>
+    <div class="withdraw-cash-form">
+      <mat-label
+        >Current Amount of Cash:
+        <strong>{{currentAmountOfCash() | currency: 'USD'}}</strong></mat-label
+      >
+      <mat-form-field appearance="fill">
+        <mat-label>Amount</mat-label>
+        <input
+          matInput
+          type="number"
+          name="amount"
+          [formControl]="amountFormControl"
+        />
+        <span matTextPrefix>$&nbsp;</span>
+        <span matTextSuffix>.00</span>
+      </mat-form-field>
+      <mat-label
+        [ngClass]="amountOfCashAfterWithdraw > 0 ? 'positive-balance' : 'negative-balance'"
+        >Amount of cash after withdrawal
+        <strong>
+          {{amountOfCashAfterWithdraw | currency: 'USD'}}</strong
+        ></mat-label
+      >
+      <button
+        matButton="filled"
+        type="submit"
+        [disabled]="!canWithdrawCash"
+        (click)="onWithdrawCashFormSubmit()"
+      >
+        Withdraw
+      </button>
+
+      @if (message){
+      <div class="message">{{ message }}</div>
+      }
+    </div>
+  </div>
 </div>
