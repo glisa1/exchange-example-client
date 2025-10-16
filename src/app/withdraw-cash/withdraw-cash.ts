@@ -15,6 +15,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import {WithdrawCashService} from './withdraw-cash.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-withdraw-cash',
@@ -36,6 +37,8 @@ export class WithdrawCashComponent implements OnInit, OnDestroy {
   private readonly userBalanceService = inject(UserBalanceService);
   private readonly keycloak = inject(Keycloak);
   private readonly withdrawCashService = inject(WithdrawCashService);
+  private readonly snackBar = inject(MatSnackBar);
+
   private balanceSubscription: Subscription = Subscription.EMPTY;
 
   public message = '';
@@ -62,8 +65,20 @@ export class WithdrawCashComponent implements OnInit, OnDestroy {
   }
 
   public onWithdrawCashFormSubmit(): void {
-    this.withdrawCashService.withdrawCash(this.amount, this.keycloak.subject!);
-    this.navigateToHome();
+    this.withdrawCashService
+      .withdrawCash(this.amount, this.keycloak.subject!)
+      .subscribe(success => {
+        if (success) {
+          this.openSnackBar('Withdraw successful');
+          this.navigateToHome();
+        } else {
+          this.openSnackBar('Error withdrawing cash');
+        }
+      });
+  }
+
+  private openSnackBar(message: string): void {
+    this.snackBar.open(message, 'Close', {duration: 3000});
   }
 
   public get amountFormControl(): FormControl {

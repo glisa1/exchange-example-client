@@ -15,6 +15,7 @@ import {DepositCashService} from './deposit-cash.service';
 import Keycloak from 'keycloak-js';
 import {UserBalanceService} from '../shared/service/user-balance.service';
 import {Subscription} from 'rxjs';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-deposit-cash',
@@ -35,6 +36,7 @@ export class DepositCashComponent implements OnInit, OnDestroy {
   private readonly depositCashService = inject(DepositCashService);
   private readonly userBalanceService = inject(UserBalanceService);
   private readonly keycloak = inject(Keycloak);
+  private readonly snackBar = inject(MatSnackBar);
 
   private balanceSubscription: Subscription = Subscription.EMPTY;
 
@@ -62,8 +64,20 @@ export class DepositCashComponent implements OnInit, OnDestroy {
   }
 
   public onDepositCashFormSubmit(): void {
-    this.depositCashService.depositCash(this.amount, this.keycloak.subject!);
-    this.navigateToHome();
+    this.depositCashService
+      .depositCash(this.amount, this.keycloak.subject!)
+      .subscribe(success => {
+        if (success) {
+          this.openSnackBar('Deposit successful');
+          this.navigateToHome();
+        } else {
+          this.openSnackBar('Error depositing cash');
+        }
+      });
+  }
+
+  private openSnackBar(message: string): void {
+    this.snackBar.open(message, 'Close', {duration: 3000});
   }
 
   public get amountFormControl(): FormControl {
