@@ -8,6 +8,7 @@ import {
 import {HttpClient} from '@angular/common/http';
 import {FetchExchangeDataModel} from '../model/exchange-home-service.model';
 import {ExchangeDataBase} from '../model/exchange-home.model';
+import Keycloak from 'keycloak-js';
 
 @Injectable({
   providedIn: 'root',
@@ -15,10 +16,13 @@ import {ExchangeDataBase} from '../model/exchange-home.model';
 export class ExchangeDataService {
   private readonly API_URL = 'http://localhost:5000/api';
   private readonly http = inject(HttpClient);
+  private readonly keycloak = inject(Keycloak);
 
-  public fetchExchangeData(): Observable<ExchangeDataBase[]> {
+  public fetchFavoriteStocksData(): Observable<ExchangeDataBase[]> {
     return this.http
-      .get<FetchExchangeDataModel[]>(`${this.API_URL}/get-all-stocks`)
+      .get<
+        FetchExchangeDataModel[]
+      >(`${this.API_URL}/get-favorite-stocks?userId=${this.keycloak.subject!}`)
       .pipe(
         map(result =>
           result.map(

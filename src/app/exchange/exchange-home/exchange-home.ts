@@ -1,10 +1,13 @@
-import {Component, computed, inject, OnDestroy, signal} from '@angular/core';
-import {ExchangeDataService} from '../service/exchange-data.service';
 import {
-  ExchangeDataBase,
-  ExchangeDataEuro,
-  ExchangeDataOwned,
-} from '../model/exchange-home.model';
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
+import {ExchangeDataService} from '../service/exchange-data.service';
+import {ExchangeDataBase, ExchangeDataEuro} from '../model/exchange-home.model';
 import {CommonModule, CurrencyPipe, NgClass} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {
@@ -15,10 +18,14 @@ import {
 import {Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {ExchangeState} from '../state/exchange.state';
-import {buyStock, loadExchangeData, sellStock} from '../state/exchange.action';
+import {loadFavoriteStocksData} from '../state/exchange.action';
 import {ExchangePricesService} from '../service/exchange-prices.service';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
+import {ExchangeDataOwned} from '../../shared/models/exchange-data.model';
+import {buyStock, sellStock} from '../../state/app.action';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
 
 @Component({
   selector: 'app-exchange-home',
@@ -29,93 +36,52 @@ import {MatIconModule} from '@angular/material/icon';
     CurrencyPipe,
     MatButtonModule,
     MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
   ],
   templateUrl: './exchange-home.html',
   styleUrl: './exchange-home.scss',
   standalone: true,
 })
-export class ExchangeHomeComponent implements OnDestroy {
-  constructor() {
-    this.exchangeService.fetchExchangeData().subscribe({
-      next: (data: ExchangeDataBase[]) => {
-        this.dispatchLoadExchangeDataAction(data);
-      },
-    });
-    this.exchangePricesService.startRecievingPriceUpdates();
-
+export class ExchangeHomeComponent implements OnInit, OnDestroy {
+  ngOnInit(): void {
     this.store
-      .select(state => state.exchange.exchangeData)
-      .subscribe((data: ExchangeDataBase[]) => {
-        this.exchangeData = data?.map(exchangeData =>
-          ExchangeDataEuro.fromObject(exchangeData)
+      .select(state => state.exchange.favoriteStocksData)
+      .subscribe((favoriteStockDataInStore: ExchangeDataBase[]) => {
+        if (!favoriteStockDataInStore) {
+          this.exchangeService.fetchFavoriteStocksData().subscribe({
+            next: (favoriteStockData: ExchangeDataBase[]) => {
+              this.dispatchLoadFavoriteStocksAction(favoriteStockData);
+              favoriteStockDataInStore = favoriteStockData;
+            },
+          });
+        }
+
+        this.favoriteStocksData = favoriteStockDataInStore?.map(
+          favoriteStocksData => ExchangeDataEuro.fromObject(favoriteStocksData)
         );
       });
+
+    this.exchangePricesService.startRecievingPriceUpdates();
   }
 
-  // private readonly exchangeSubscriptions: Map<string, Subscription> = new Map<
-  //   string,
-  //   Subscription
-  // >();
   private readonly exchangeService: ExchangeDataService =
     inject(ExchangeDataService);
   private readonly router = inject(Router);
   private readonly store = inject(Store<ExchangeState>);
   private readonly exchangePricesService = inject(ExchangePricesService);
 
-  public exchangeData?: Array<ExchangeDataEuro>;
+  public favoriteStocksData?: Array<ExchangeDataEuro>;
   public newIndexCode: string = '';
 
   public canAddIndex = signal(true);
   public canRemoveIndex = signal(true);
-  public trackingAnyIndex = computed(() => {
-    const exchangeData = this.store.selectSignal<ExchangeDataBase[] | null>(
-      state => state.exchange.exchangeData
-    )();
-    return Array.isArray(exchangeData) && exchangeData.length > 0;
+  public hasFavoriteStocksSignal = computed(() => {
+    return (
+      Array.isArray(this.favoriteStocksData) &&
+      this.favoriteStocksData.length > 0
+    );
   });
-
-  // public disconnectFromExchange(): void {
-  //   //this.unsubscribeFromAllExchanges();
-  //   this.connectedToExchange.set(false);
-  // }
-
-  // public connectToExchange(): void {
-  //   //this.syncExchangeData();
-  //   this.connectedToExchange.set(true);
-  // }
-
-  // public addExchangeIndex(): void {
-  //   const newIndexCode = this.newIndexCode.trim().toUpperCase();
-  //   if (newIndexCode === '') {
-  //     return;
-  //   }
-
-  //   if (this.exchangeData?.some(e => e.code === newIndexCode)) {
-  //     this.newIndexCode = '';
-  //     return;
-  //   }
-
-  //   const newIndexName = `${newIndexCode}_name`;
-
-  //   this.exchangeService.addExchangeIndex(newIndexCode, newIndexName);
-  //   this.exchangeData?.push(new ExchangeDataEuro(newIndexCode, newIndexName));
-  //   this.exchangeSubscriptions.set(
-  //     newIndexCode,
-  //     this.getIndexPriceSubscription(newIndexCode)
-  //   );
-
-  //   this.newIndexCode = '';
-  //   this.updateAddAndRemoveIndexSignals();
-  // }
-
-  // public removeExchangeIndex(code: string): void {
-  //   this.exchangeService.removeExchangeIndex(code);
-  //   this.exchangeData = this.exchangeData?.filter(e => e.code !== code);
-  //   this.exchangeSubscriptions.get(code)?.unsubscribe();
-  //   this.exchangeSubscriptions.delete(code);
-  //   this.updateAddAndRemoveIndexSignals();
-  //   this.updateAnyIndexTrackingSignal();
-  // }
 
   public navigateToHome(): void {
     this.router.navigate(['/']);
@@ -168,106 +134,17 @@ export class ExchangeHomeComponent implements OnDestroy {
       return 0;
     }
 
-    const exchangeDataItem = this.exchangeData?.find(e => e.code === stockCode);
+    const exchangeDataItem = this.favoriteStocksData?.find(
+      e => e.code === stockCode
+    );
     return (exchangeDataItem?.price ?? 0) * ownedStockAmount;
   }
 
-  public getOwnedStockAmountValueEur(stockCode: string): number | undefined {
-    const ownedStockValue = this.getOwnedStockAmountValue(stockCode);
-
-    return ownedStockValue! * DOLAR_TO_EURO_CONVERSION_RATE;
-  }
-
   public canBuyOrSellStock(stockCode: string): boolean {
-    return !!this.exchangeData?.find(
+    return !!this.favoriteStocksData?.find(
       exchangeData => exchangeData.code === stockCode
     )?.price;
   }
-
-  // private syncExchangeData(): void {
-  //   if (!this.exchangeData || this.exchangeData!.length === 0) {
-  //     this.exchangeData = this.exchangeService.exchangeData.map(exchangeData =>
-  //       ExchangeDataBase.fromObject(exchangeData)
-  //     );
-  //   }
-
-  //   this.updateAnyIndexTrackingSignal();
-
-  //   this.exchangeData!.forEach(exchangeData => {
-  //     this.exchangeSubscriptions.set(
-  //       exchangeData.code,
-  //       this.getIndexPriceSubscription(exchangeData.code)
-  //     );
-  //   });
-  // }
-
-  private updateAddAndRemoveIndexSignals(): void {
-    if (this.exchangeData!.length === MAX_NUMBER_OF_EXCHANGES) {
-      this.canAddIndex.set(false);
-    } else {
-      this.canAddIndex.set(true);
-    }
-
-    if (this.exchangeData!.length === MIN_NUMBER_OF_EXCHANGES) {
-      this.canRemoveIndex.set(false);
-    } else {
-      this.canRemoveIndex.set(true);
-    }
-  }
-
-  // private updateAnyIndexTrackingSignal(): void {
-  //   this.exchangeData!.length > 0
-  //     ? this.trackingAnyIndex.set(true)
-  //     : this.trackingAnyIndex.set(false);
-  // }
-
-  // private getIndexPriceSubscription(indexCode: string): Subscription {
-  //   return this.exchangeService
-  //     .getIndexPrice(indexCode)
-  //     .pipe(
-  //       map((value: ExchangeData) => {
-  //         const existingExchangeData = this.exchangeData!.find(
-  //           e => e.code === value.code
-  //         );
-
-  //         let priceGrown = existingExchangeData!.priceGrown ?? false;
-  //         if (value.price! > existingExchangeData?.price!) {
-  //           priceGrown = true;
-  //         } else if (value.price! < existingExchangeData?.price!) {
-  //           priceGrown = false;
-  //         }
-
-  //         return new ExchangeDataBase(
-  //           value.code,
-  //           value.name,
-  //           value.price!,
-  //           priceGrown
-  //         );
-  //       })
-  //     )
-  //     .pipe(
-  //       map((value: ExchangeData) => {
-  //         const exchangeData = ExchangeDataEuro.fromObject(value);
-  //         exchangeData.priceEuro =
-  //           exchangeData.price! * DOLAR_TO_EURO_CONVERSION_RATE; // Example conversion rate
-  //         return exchangeData;
-  //       })
-  //     )
-  //     .subscribe(value => {
-  //       const existingExchangeDataIndex = this.exchangeData!.findIndex(
-  //         e => e.code === value.code
-  //       );
-
-  //       this.exchangeData![existingExchangeDataIndex] = value;
-  //     });
-  // }
-
-  // private unsubscribeFromAllExchanges(): void {
-  //   this.exchangeSubscriptions.forEach(subscription => {
-  //     subscription.unsubscribe();
-  //   });
-  //   this.exchangeSubscriptions.clear();
-  // }
 
   private dispatchStockBuyAction(stockCode: string, amount: number): void {
     const exchangeDataBought = new ExchangeDataOwned(stockCode, amount);
@@ -279,8 +156,8 @@ export class ExchangeHomeComponent implements OnDestroy {
     this.store.dispatch(sellStock({exchangeDataSold: exchangeDataBought}));
   }
 
-  private dispatchLoadExchangeDataAction(data: ExchangeDataBase[]): void {
-    this.store.dispatch(loadExchangeData({exchangeData: data}));
+  private dispatchLoadFavoriteStocksAction(data: ExchangeDataBase[]): void {
+    this.store.dispatch(loadFavoriteStocksData({favoriteStocksData: data}));
   }
 
   private clearNumberInputAfterUse(amountInputElement: HTMLInputElement): void {
@@ -296,7 +173,7 @@ export class ExchangeHomeComponent implements OnDestroy {
   }
 
   private validateStockOptionExists(stockCode: string): boolean {
-    return this.exchangeData?.some(e => e.code === stockCode) ?? false;
+    return this.favoriteStocksData?.some(e => e.code === stockCode) ?? false;
   }
 
   ngOnDestroy(): void {

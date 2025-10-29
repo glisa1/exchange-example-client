@@ -13,3 +13,13 @@ export class ExchangeData {
     return new ExchangeData(obj.code, obj.name, obj.price);
   }
 }
+
+export class ExchangeDataOwned {
+  public code: string;
+  public amount: number;
+
+  constructor(code: string, amount: number) {
+    this.code = code;
+    this.amount = amount;
+  }
+}

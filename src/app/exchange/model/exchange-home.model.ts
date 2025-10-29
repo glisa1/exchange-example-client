@@ -57,13 +57,3 @@ export class ExchangeDataEuro extends ExchangeDataBase {
     this.priceEuro = priceEuro;
   }
 }
-
-export class ExchangeDataOwned {
-  public code: string;
-  public amount: number;
-
-  constructor(code: string, amount: number) {
-    this.code = code;
-    this.amount = amount;
-  }
-}

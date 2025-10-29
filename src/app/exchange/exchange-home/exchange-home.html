@@ -17,9 +17,32 @@
   <div class="exchange-data">
     <h1>The Exchange</h1>
 
-    @if (trackingAnyIndex()){
-    <table class="table table-bordered mb-0 exchange-table">
-      @for (stockExchangeData of exchangeData; track $index) {
+    <div class="exchange-data-search">
+      <mat-form-field>
+        <mat-label>Search</mat-label>
+        <input matInput />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    @if (hasFavoriteStocksSignal()){
+    <div class="favorite-stocks-main-container">
+      @for (stockExchangeData of favoriteStocksData; track $index) {
+      <div class="favorite-stocks-index-card">
+        <div class="favorite-stocks-index-card-item">
+          {{stockExchangeData.code}}
+        </div>
+        <div class="favorite-stocks-index-card-item">
+          {{stockExchangeData.price | currency: 'USD'}}
+        </div>
+        <div class="favorite-stocks-index-card-item">
+          {{stockExchangeData.code}}
+        </div>
+      </div>
+      }
+    </div>
+    <!-- <table class="table table-bordered mb-0 exchange-table">
+      @for (stockExchangeData of favoriteStocksData; track $index) {
       <div
         class="exchange-item"
         [ngClass]="stockExchangeData.priceGrown ? 'price-rising' : 'price-falling'"
@@ -79,9 +102,12 @@
         </tr>
       </div>
       }
-    </table>
+    </table> -->
     }@else {
-    <p>Please start tracking an index to see the data.</p>
+    <p>
+      You have no favorite stocks. Search the stocks or see some of stocks
+      listed under and add them to favorites.
+    </p>
     }
   </div>
 </div>
